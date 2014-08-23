@@ -1,0 +1,634 @@
+<!DOCTYPE html>
+<!-- saved from url=(0014)about:internet -->
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+<meta http-equiv="x-ua-compatible" content="IE=9" >
+
+<title>NOAA Storm Database Exploration</title>
+
+<style type="text/css">
+body, td {
+   font-family: sans-serif;
+   background-color: white;
+   font-size: 12px;
+   margin: 8px;
+}
+
+tt, code, pre {
+   font-family: 'DejaVu Sans Mono', 'Droid Sans Mono', 'Lucida Console', Consolas, Monaco, monospace;
+}
+
+h1 { 
+   font-size:2.2em; 
+}
+
+h2 { 
+   font-size:1.8em; 
+}
+
+h3 { 
+   font-size:1.4em; 
+}
+
+h4 { 
+   font-size:1.0em; 
+}
+
+h5 { 
+   font-size:0.9em; 
+}
+
+h6 { 
+   font-size:0.8em; 
+}
+
+a:visited {
+   color: rgb(50%, 0%, 50%);
+}
+
+pre {	
+   margin-top: 0;
+   max-width: 95%;
+   border: 1px solid #ccc;
+   white-space: pre-wrap;
+}
+
+pre code {
+   display: block; padding: 0.5em;
+}
+
+code.r, code.cpp {
+   background-color: #F8F8F8;
+}
+
+table, td, th {
+  border: none;
+}
+
+blockquote {
+   color:#666666;
+   margin:0;
+   padding-left: 1em;
+   border-left: 0.5em #EEE solid;
+}
+
+hr {
+   height: 0px;
+   border-bottom: none;
+   border-top-width: thin;
+   border-top-style: dotted;
+   border-top-color: #999999;
+}
+
+@media print {
+   * { 
+      background: transparent !important; 
+      color: black !important; 
+      filter:none !important; 
+      -ms-filter: none !important; 
+   }
+
+   body { 
+      font-size:12pt; 
+      max-width:100%; 
+   }
+       
+   a, a:visited { 
+      text-decoration: underline; 
+   }
+
+   hr { 
+      visibility: hidden;
+      page-break-before: always;
+   }
+
+   pre, blockquote { 
+      padding-right: 1em; 
+      page-break-inside: avoid; 
+   }
+
+   tr, img { 
+      page-break-inside: avoid; 
+   }
+
+   img { 
+      max-width: 100% !important; 
+   }
+
+   @page :left { 
+      margin: 15mm 20mm 15mm 10mm; 
+   }
+     
+   @page :right { 
+      margin: 15mm 10mm 15mm 20mm; 
+   }
+
+   p, h2, h3 { 
+      orphans: 3; widows: 3; 
+   }
+
+   h2, h3 { 
+      page-break-after: avoid; 
+   }
+}
+
+</style>
+
+<!-- Styles for R syntax highlighter -->
+<style type="text/css">
+   pre .operator,
+   pre .paren {
+     color: rgb(104, 118, 135)
+   }
+
+   pre .literal {
+     color: rgb(88, 72, 246)
+   }
+
+   pre .number {
+     color: rgb(0, 0, 205);
+   }
+
+   pre .comment {
+     color: rgb(76, 136, 107);
+   }
+
+   pre .keyword {
+     color: rgb(0, 0, 255);
+   }
+
+   pre .identifier {
+     color: rgb(0, 0, 0);
+   }
+
+   pre .string {
+     color: rgb(3, 106, 7);
+   }
+</style>
+
+<!-- R syntax highlighter -->
+<script type="text/javascript">
+var hljs=new function(){function m(p){return p.replace(/&/gm,"&amp;").replace(/</gm,"&lt;")}function f(r,q,p){return RegExp(q,"m"+(r.cI?"i":"")+(p?"g":""))}function b(r){for(var p=0;p<r.childNodes.length;p++){var q=r.childNodes[p];if(q.nodeName=="CODE"){return q}if(!(q.nodeType==3&&q.nodeValue.match(/\s+/))){break}}}function h(t,s){var p="";for(var r=0;r<t.childNodes.length;r++){if(t.childNodes[r].nodeType==3){var q=t.childNodes[r].nodeValue;if(s){q=q.replace(/\n/g,"")}p+=q}else{if(t.childNodes[r].nodeName=="BR"){p+="\n"}else{p+=h(t.childNodes[r])}}}if(/MSIE [678]/.test(navigator.userAgent)){p=p.replace(/\r/g,"\n")}return p}function a(s){var r=s.className.split(/\s+/);r=r.concat(s.parentNode.className.split(/\s+/));for(var q=0;q<r.length;q++){var p=r[q].replace(/^language-/,"");if(e[p]){return p}}}function c(q){var p=[];(function(s,t){for(var r=0;r<s.childNodes.length;r++){if(s.childNodes[r].nodeType==3){t+=s.childNodes[r].nodeValue.length}else{if(s.childNodes[r].nodeName=="BR"){t+=1}else{if(s.childNodes[r].nodeType==1){p.push({event:"start",offset:t,node:s.childNodes[r]});t=arguments.callee(s.childNodes[r],t);p.push({event:"stop",offset:t,node:s.childNodes[r]})}}}}return t})(q,0);return p}function k(y,w,x){var q=0;var z="";var s=[];function u(){if(y.length&&w.length){if(y[0].offset!=w[0].offset){return(y[0].offset<w[0].offset)?y:w}else{return w[0].event=="start"?y:w}}else{return y.length?y:w}}function t(D){var A="<"+D.nodeName.toLowerCase();for(var B=0;B<D.attributes.length;B++){var C=D.attributes[B];A+=" "+C.nodeName.toLowerCase();if(C.value!==undefined&&C.value!==false&&C.value!==null){A+='="'+m(C.value)+'"'}}return A+">"}while(y.length||w.length){var v=u().splice(0,1)[0];z+=m(x.substr(q,v.offset-q));q=v.offset;if(v.event=="start"){z+=t(v.node);s.push(v.node)}else{if(v.event=="stop"){var p,r=s.length;do{r--;p=s[r];z+=("</"+p.nodeName.toLowerCase()+">")}while(p!=v.node);s.splice(r,1);while(r<s.length){z+=t(s[r]);r++}}}}return z+m(x.substr(q))}function j(){function q(x,y,v){if(x.compiled){return}var u;var s=[];if(x.k){x.lR=f(y,x.l||hljs.IR,true);for(var w in x.k){if(!x.k.hasOwnProperty(w)){continue}if(x.k[w] instanceof Object){u=x.k[w]}else{u=x.k;w="keyword"}for(var r in u){if(!u.hasOwnProperty(r)){continue}x.k[r]=[w,u[r]];s.push(r)}}}if(!v){if(x.bWK){x.b="\\b("+s.join("|")+")\\s"}x.bR=f(y,x.b?x.b:"\\B|\\b");if(!x.e&&!x.eW){x.e="\\B|\\b"}if(x.e){x.eR=f(y,x.e)}}if(x.i){x.iR=f(y,x.i)}if(x.r===undefined){x.r=1}if(!x.c){x.c=[]}x.compiled=true;for(var t=0;t<x.c.length;t++){if(x.c[t]=="self"){x.c[t]=x}q(x.c[t],y,false)}if(x.starts){q(x.starts,y,false)}}for(var p in e){if(!e.hasOwnProperty(p)){continue}q(e[p].dM,e[p],true)}}function d(B,C){if(!j.called){j();j.called=true}function q(r,M){for(var L=0;L<M.c.length;L++){if((M.c[L].bR.exec(r)||[null])[0]==r){return M.c[L]}}}function v(L,r){if(D[L].e&&D[L].eR.test(r)){return 1}if(D[L].eW){var M=v(L-1,r);return M?M+1:0}return 0}function w(r,L){return L.i&&L.iR.test(r)}function K(N,O){var M=[];for(var L=0;L<N.c.length;L++){M.push(N.c[L].b)}var r=D.length-1;do{if(D[r].e){M.push(D[r].e)}r--}while(D[r+1].eW);if(N.i){M.push(N.i)}return f(O,M.join("|"),true)}function p(M,L){var N=D[D.length-1];if(!N.t){N.t=K(N,E)}N.t.lastIndex=L;var r=N.t.exec(M);return r?[M.substr(L,r.index-L),r[0],false]:[M.substr(L),"",true]}function z(N,r){var L=E.cI?r[0].toLowerCase():r[0];var M=N.k[L];if(M&&M instanceof Array){return M}return false}function F(L,P){L=m(L);if(!P.k){return L}var r="";var O=0;P.lR.lastIndex=0;var M=P.lR.exec(L);while(M){r+=L.substr(O,M.index-O);var N=z(P,M);if(N){x+=N[1];r+='<span class="'+N[0]+'">'+M[0]+"</span>"}else{r+=M[0]}O=P.lR.lastIndex;M=P.lR.exec(L)}return r+L.substr(O,L.length-O)}function J(L,M){if(M.sL&&e[M.sL]){var r=d(M.sL,L);x+=r.keyword_count;return r.value}else{return F(L,M)}}function I(M,r){var L=M.cN?'<span class="'+M.cN+'">':"";if(M.rB){y+=L;M.buffer=""}else{if(M.eB){y+=m(r)+L;M.buffer=""}else{y+=L;M.buffer=r}}D.push(M);A+=M.r}function G(N,M,Q){var R=D[D.length-1];if(Q){y+=J(R.buffer+N,R);return false}var P=q(M,R);if(P){y+=J(R.buffer+N,R);I(P,M);return P.rB}var L=v(D.length-1,M);if(L){var O=R.cN?"</span>":"";if(R.rE){y+=J(R.buffer+N,R)+O}else{if(R.eE){y+=J(R.buffer+N,R)+O+m(M)}else{y+=J(R.buffer+N+M,R)+O}}while(L>1){O=D[D.length-2].cN?"</span>":"";y+=O;L--;D.length--}var r=D[D.length-1];D.length--;D[D.length-1].buffer="";if(r.starts){I(r.starts,"")}return R.rE}if(w(M,R)){throw"Illegal"}}var E=e[B];var D=[E.dM];var A=0;var x=0;var y="";try{var s,u=0;E.dM.buffer="";do{s=p(C,u);var t=G(s[0],s[1],s[2]);u+=s[0].length;if(!t){u+=s[1].length}}while(!s[2]);if(D.length>1){throw"Illegal"}return{r:A,keyword_count:x,value:y}}catch(H){if(H=="Illegal"){return{r:0,keyword_count:0,value:m(C)}}else{throw H}}}function g(t){var p={keyword_count:0,r:0,value:m(t)};var r=p;for(var q in e){if(!e.hasOwnProperty(q)){continue}var s=d(q,t);s.language=q;if(s.keyword_count+s.r>r.keyword_count+r.r){r=s}if(s.keyword_count+s.r>p.keyword_count+p.r){r=p;p=s}}if(r.language){p.second_best=r}return p}function i(r,q,p){if(q){r=r.replace(/^((<[^>]+>|\t)+)/gm,function(t,w,v,u){return w.replace(/\t/g,q)})}if(p){r=r.replace(/\n/g,"<br>")}return r}function n(t,w,r){var x=h(t,r);var v=a(t);var y,s;if(v){y=d(v,x)}else{return}var q=c(t);if(q.length){s=document.createElement("pre");s.innerHTML=y.value;y.value=k(q,c(s),x)}y.value=i(y.value,w,r);var u=t.className;if(!u.match("(\\s|^)(language-)?"+v+"(\\s|$)")){u=u?(u+" "+v):v}if(/MSIE [678]/.test(navigator.userAgent)&&t.tagName=="CODE"&&t.parentNode.tagName=="PRE"){s=t.parentNode;var p=document.createElement("div");p.innerHTML="<pre><code>"+y.value+"</code></pre>";t=p.firstChild.firstChild;p.firstChild.cN=s.cN;s.parentNode.replaceChild(p.firstChild,s)}else{t.innerHTML=y.value}t.className=u;t.result={language:v,kw:y.keyword_count,re:y.r};if(y.second_best){t.second_best={language:y.second_best.language,kw:y.second_best.keyword_count,re:y.second_best.r}}}function o(){if(o.called){return}o.called=true;var r=document.getElementsByTagName("pre");for(var p=0;p<r.length;p++){var q=b(r[p]);if(q){n(q,hljs.tabReplace)}}}function l(){if(window.addEventListener){window.addEventListener("DOMContentLoaded",o,false);window.addEventListener("load",o,false)}else{if(window.attachEvent){window.attachEvent("onload",o)}else{window.onload=o}}}var e={};this.LANGUAGES=e;this.highlight=d;this.highlightAuto=g;this.fixMarkup=i;this.highlightBlock=n;this.initHighlighting=o;this.initHighlightingOnLoad=l;this.IR="[a-zA-Z][a-zA-Z0-9_]*";this.UIR="[a-zA-Z_][a-zA-Z0-9_]*";this.NR="\\b\\d+(\\.\\d+)?";this.CNR="\\b(0[xX][a-fA-F0-9]+|(\\d+(\\.\\d*)?|\\.\\d+)([eE][-+]?\\d+)?)";this.BNR="\\b(0b[01]+)";this.RSR="!|!=|!==|%|%=|&|&&|&=|\\*|\\*=|\\+|\\+=|,|\\.|-|-=|/|/=|:|;|<|<<|<<=|<=|=|==|===|>|>=|>>|>>=|>>>|>>>=|\\?|\\[|\\{|\\(|\\^|\\^=|\\||\\|=|\\|\\||~";this.ER="(?![\\s\\S])";this.BE={b:"\\\\.",r:0};this.ASM={cN:"string",b:"'",e:"'",i:"\\n",c:[this.BE],r:0};this.QSM={cN:"string",b:'"',e:'"',i:"\\n",c:[this.BE],r:0};this.CLCM={cN:"comment",b:"//",e:"$"};this.CBLCLM={cN:"comment",b:"/\\*",e:"\\*/"};this.HCM={cN:"comment",b:"#",e:"$"};this.NM={cN:"number",b:this.NR,r:0};this.CNM={cN:"number",b:this.CNR,r:0};this.BNM={cN:"number",b:this.BNR,r:0};this.inherit=function(r,s){var p={};for(var q in r){p[q]=r[q]}if(s){for(var q in s){p[q]=s[q]}}return p}}();hljs.LANGUAGES.cpp=function(){var a={keyword:{"false":1,"int":1,"float":1,"while":1,"private":1,"char":1,"catch":1,"export":1,virtual:1,operator:2,sizeof:2,dynamic_cast:2,typedef:2,const_cast:2,"const":1,struct:1,"for":1,static_cast:2,union:1,namespace:1,unsigned:1,"long":1,"throw":1,"volatile":2,"static":1,"protected":1,bool:1,template:1,mutable:1,"if":1,"public":1,friend:2,"do":1,"return":1,"goto":1,auto:1,"void":2,"enum":1,"else":1,"break":1,"new":1,extern:1,using:1,"true":1,"class":1,asm:1,"case":1,typeid:1,"short":1,reinterpret_cast:2,"default":1,"double":1,register:1,explicit:1,signed:1,typename:1,"try":1,"this":1,"switch":1,"continue":1,wchar_t:1,inline:1,"delete":1,alignof:1,char16_t:1,char32_t:1,constexpr:1,decltype:1,noexcept:1,nullptr:1,static_assert:1,thread_local:1,restrict:1,_Bool:1,complex:1},built_in:{std:1,string:1,cin:1,cout:1,cerr:1,clog:1,stringstream:1,istringstream:1,ostringstream:1,auto_ptr:1,deque:1,list:1,queue:1,stack:1,vector:1,map:1,set:1,bitset:1,multiset:1,multimap:1,unordered_set:1,unordered_map:1,unordered_multiset:1,unordered_multimap:1,array:1,shared_ptr:1}};return{dM:{k:a,i:"</",c:[hljs.CLCM,hljs.CBLCLM,hljs.QSM,{cN:"string",b:"'\\\\?.",e:"'",i:"."},{cN:"number",b:"\\b(\\d+(\\.\\d*)?|\\.\\d+)(u|U|l|L|ul|UL|f|F)"},hljs.CNM,{cN:"preprocessor",b:"#",e:"$"},{cN:"stl_container",b:"\\b(deque|list|queue|stack|vector|map|set|bitset|multiset|multimap|unordered_map|unordered_set|unordered_multiset|unordered_multimap|array)\\s*<",e:">",k:a,r:10,c:["self"]}]}}}();hljs.LANGUAGES.r={dM:{c:[hljs.HCM,{cN:"number",b:"\\b0[xX][0-9a-fA-F]+[Li]?\\b",e:hljs.IMMEDIATE_RE,r:0},{cN:"number",b:"\\b\\d+(?:[eE][+\\-]?\\d*)?L\\b",e:hljs.IMMEDIATE_RE,r:0},{cN:"number",b:"\\b\\d+\\.(?!\\d)(?:i\\b)?",e:hljs.IMMEDIATE_RE,r:1},{cN:"number",b:"\\b\\d+(?:\\.\\d*)?(?:[eE][+\\-]?\\d*)?i?\\b",e:hljs.IMMEDIATE_RE,r:0},{cN:"number",b:"\\.\\d+(?:[eE][+\\-]?\\d*)?i?\\b",e:hljs.IMMEDIATE_RE,r:1},{cN:"keyword",b:"(?:tryCatch|library|setGeneric|setGroupGeneric)\\b",e:hljs.IMMEDIATE_RE,r:10},{cN:"keyword",b:"\\.\\.\\.",e:hljs.IMMEDIATE_RE,r:10},{cN:"keyword",b:"\\.\\.\\d+(?![\\w.])",e:hljs.IMMEDIATE_RE,r:10},{cN:"keyword",b:"\\b(?:function)",e:hljs.IMMEDIATE_RE,r:2},{cN:"keyword",b:"(?:if|in|break|next|repeat|else|for|return|switch|while|try|stop|warning|require|attach|detach|source|setMethod|setClass)\\b",e:hljs.IMMEDIATE_RE,r:1},{cN:"literal",b:"(?:NA|NA_integer_|NA_real_|NA_character_|NA_complex_)\\b",e:hljs.IMMEDIATE_RE,r:10},{cN:"literal",b:"(?:NULL|TRUE|FALSE|T|F|Inf|NaN)\\b",e:hljs.IMMEDIATE_RE,r:1},{cN:"identifier",b:"[a-zA-Z.][a-zA-Z0-9._]*\\b",e:hljs.IMMEDIATE_RE,r:0},{cN:"operator",b:"<\\-(?!\\s*\\d)",e:hljs.IMMEDIATE_RE,r:2},{cN:"operator",b:"\\->|<\\-",e:hljs.IMMEDIATE_RE,r:1},{cN:"operator",b:"%%|~",e:hljs.IMMEDIATE_RE},{cN:"operator",b:">=|<=|==|!=|\\|\\||&&|=|\\+|\\-|\\*|/|\\^|>|<|!|&|\\||\\$|:",e:hljs.IMMEDIATE_RE,r:0},{cN:"operator",b:"%",e:"%",i:"\\n",r:1},{cN:"identifier",b:"`",e:"`",r:0},{cN:"string",b:'"',e:'"',c:[hljs.BE],r:0},{cN:"string",b:"'",e:"'",c:[hljs.BE],r:0},{cN:"paren",b:"[[({\\])}]",e:hljs.IMMEDIATE_RE,r:0}]}};
+hljs.initHighlightingOnLoad();
+</script>
+
+
+
+
+</head>
+
+<body>
+<h2>NOAA Storm Database Exploration</h2>
+
+<h3>Synopsis</h3>
+
+<pre><code class="r">library(utils)
+library(reshape2)
+library(plyr)
+opts_chunk$set(echo=TRUE, fig.width=6, fig.height=6)
+</code></pre>
+
+<h3>Data Processing</h3>
+
+<h4>Download data and documentation files</h4>
+
+<pre><code class="r">blueFedoraDownload &lt;- function (fileURL, destfile, method=&quot;auto&quot;, quiet=TRUE) {
+    if(!file.exists(&quot;./data&quot;)) {
+        dir.create(&quot;./data&quot;)
+    }
+    destfile &lt;- paste0(&quot;./data/&quot;, destfile)
+    if (!file.exists(destfile)) {
+        if (grepl(&quot;https:&quot;, fileURL) &amp; method==&quot;auto&quot;) {
+            method &lt;- &quot;curl&quot;
+        }
+        print(sprintf(&quot;DL file: %s on %s&quot;, destfile, date()))
+        download.file(fileURL, destfile=destfile, method=method, quiet=quiet)
+    }
+}
+#download data file
+url &lt;- &quot;https://d396qusza40orc.cloudfront.net/repdata%2Fdata%2FStormData.csv.bz2&quot;
+dest &lt;- &quot;StormData.bz2&quot;
+blueFedoraDownload(url, dest)
+
+#download storm data documentation
+url &lt;- &quot;https://d396qusza40orc.cloudfront.net/repdata%2Fpeer2_doc%2Fpd01016005curr.pdf&quot;
+dest &lt;- &quot;pd0101600tcurr.pdf&quot;
+blueFedoraDownload(url, dest)
+
+#download storm events FAQ
+url &lt;- &quot;https://d396qusza40orc.cloudfront.net/repdata%2Fpeer2_doc%2FNCDC%20Storm%20Events-FAQ%20Page.pdf&quot;
+dest &lt;- &quot;StormEventsFAQ.pdf&quot;
+blueFedoraDownload(url, dest)
+</code></pre>
+
+<h4>Read data into StormData data.frame</h4>
+
+<pre><code class="r">StormData &lt;- read.csv(&quot;./data/StormData.bz2&quot;)
+</code></pre>
+
+<p>Exploring the storm data:</p>
+
+<pre><code class="r">names(StormData)
+</code></pre>
+
+<pre><code>##  [1] &quot;STATE__&quot;    &quot;BGN_DATE&quot;   &quot;BGN_TIME&quot;   &quot;TIME_ZONE&quot;  &quot;COUNTY&quot;    
+##  [6] &quot;COUNTYNAME&quot; &quot;STATE&quot;      &quot;EVTYPE&quot;     &quot;BGN_RANGE&quot;  &quot;BGN_AZI&quot;   
+## [11] &quot;BGN_LOCATI&quot; &quot;END_DATE&quot;   &quot;END_TIME&quot;   &quot;COUNTY_END&quot; &quot;COUNTYENDN&quot;
+## [16] &quot;END_RANGE&quot;  &quot;END_AZI&quot;    &quot;END_LOCATI&quot; &quot;LENGTH&quot;     &quot;WIDTH&quot;     
+## [21] &quot;F&quot;          &quot;MAG&quot;        &quot;FATALITIES&quot; &quot;INJURIES&quot;   &quot;PROPDMG&quot;   
+## [26] &quot;PROPDMGEXP&quot; &quot;CROPDMG&quot;    &quot;CROPDMGEXP&quot; &quot;WFO&quot;        &quot;STATEOFFIC&quot;
+## [31] &quot;ZONENAMES&quot;  &quot;LATITUDE&quot;   &quot;LONGITUDE&quot;  &quot;LATITUDE_E&quot; &quot;LONGITUDE_&quot;
+## [36] &quot;REMARKS&quot;    &quot;REFNUM&quot;
+</code></pre>
+
+<pre><code class="r">str(StormData)
+</code></pre>
+
+<pre><code>## &#39;data.frame&#39;:    902297 obs. of  37 variables:
+##  $ STATE__   : num  1 1 1 1 1 1 1 1 1 1 ...
+##  $ BGN_DATE  : Factor w/ 16335 levels &quot;1/1/1966 0:00:00&quot;,..: 6523 6523 4242 11116 2224 2224 2260 383 3980 3980 ...
+##  $ BGN_TIME  : Factor w/ 3608 levels &quot;000&quot;,&quot;0000&quot;,&quot;0001&quot;,..: 152 167 2645 1563 2524 3126 122 1563 3126 3126 ...
+##  $ TIME_ZONE : Factor w/ 22 levels &quot;ADT&quot;,&quot;AKS&quot;,&quot;AST&quot;,..: 6 6 6 6 6 6 6 6 6 6 ...
+##  $ COUNTY    : num  97 3 57 89 43 77 9 123 125 57 ...
+##  $ COUNTYNAME: Factor w/ 29601 levels &quot;&quot;,&quot;5NM E OF MACKINAC BRIDGE TO PRESQUE ISLE LT MI&quot;,..: 13513 1873 4598 10592 4372 10094 1973 23873 24418 4598 ...
+##  $ STATE     : Factor w/ 72 levels &quot;AK&quot;,&quot;AL&quot;,&quot;AM&quot;,..: 2 2 2 2 2 2 2 2 2 2 ...
+##  $ EVTYPE    : Factor w/ 985 levels &quot;   HIGH SURF ADVISORY&quot;,..: 826 826 826 826 826 826 826 826 826 826 ...
+##  $ BGN_RANGE : num  0 0 0 0 0 0 0 0 0 0 ...
+##  $ BGN_AZI   : Factor w/ 35 levels &quot;&quot;,&quot;  N&quot;,&quot; NW&quot;,..: 1 1 1 1 1 1 1 1 1 1 ...
+##  $ BGN_LOCATI: Factor w/ 54429 levels &quot;&quot;,&quot; Christiansburg&quot;,..: 1 1 1 1 1 1 1 1 1 1 ...
+##  $ END_DATE  : Factor w/ 6663 levels &quot;&quot;,&quot;1/1/1993 0:00:00&quot;,..: 1 1 1 1 1 1 1 1 1 1 ...
+##  $ END_TIME  : Factor w/ 3647 levels &quot;&quot;,&quot; 0900CST&quot;,..: 1 1 1 1 1 1 1 1 1 1 ...
+##  $ COUNTY_END: num  0 0 0 0 0 0 0 0 0 0 ...
+##  $ COUNTYENDN: logi  NA NA NA NA NA NA ...
+##  $ END_RANGE : num  0 0 0 0 0 0 0 0 0 0 ...
+##  $ END_AZI   : Factor w/ 24 levels &quot;&quot;,&quot;E&quot;,&quot;ENE&quot;,&quot;ESE&quot;,..: 1 1 1 1 1 1 1 1 1 1 ...
+##  $ END_LOCATI: Factor w/ 34506 levels &quot;&quot;,&quot; CANTON&quot;,&quot; TULIA&quot;,..: 1 1 1 1 1 1 1 1 1 1 ...
+##  $ LENGTH    : num  14 2 0.1 0 0 1.5 1.5 0 3.3 2.3 ...
+##  $ WIDTH     : num  100 150 123 100 150 177 33 33 100 100 ...
+##  $ F         : int  3 2 2 2 2 2 2 1 3 3 ...
+##  $ MAG       : num  0 0 0 0 0 0 0 0 0 0 ...
+##  $ FATALITIES: num  0 0 0 0 0 0 0 0 1 0 ...
+##  $ INJURIES  : num  15 0 2 2 2 6 1 0 14 0 ...
+##  $ PROPDMG   : num  25 2.5 25 2.5 2.5 2.5 2.5 2.5 25 25 ...
+##  $ PROPDMGEXP: Factor w/ 19 levels &quot;&quot;,&quot;+&quot;,&quot;-&quot;,&quot;0&quot;,..: 16 16 16 16 16 16 16 16 16 16 ...
+##  $ CROPDMG   : num  0 0 0 0 0 0 0 0 0 0 ...
+##  $ CROPDMGEXP: Factor w/ 9 levels &quot;&quot;,&quot;0&quot;,&quot;2&quot;,&quot;?&quot;,..: 1 1 1 1 1 1 1 1 1 1 ...
+##  $ WFO       : Factor w/ 542 levels &quot;&quot;,&quot; CI&quot;,&quot;$AC&quot;,..: 1 1 1 1 1 1 1 1 1 1 ...
+##  $ STATEOFFIC: Factor w/ 250 levels &quot;&quot;,&quot;ALABAMA, Central&quot;,..: 1 1 1 1 1 1 1 1 1 1 ...
+##  $ ZONENAMES : Factor w/ 25112 levels &quot;&quot;,&quot;                                                                                                                               &quot;| __truncated__,..: 1 1 1 1 1 1 1 1 1 1 ...
+##  $ LATITUDE  : num  3040 3042 3340 3458 3412 ...
+##  $ LONGITUDE : num  8812 8755 8742 8626 8642 ...
+##  $ LATITUDE_E: num  3051 0 0 0 0 ...
+##  $ LONGITUDE_: num  8806 0 0 0 0 ...
+##  $ REMARKS   : Factor w/ 436781 levels &quot;&quot;,&quot;\t&quot;,&quot;\t\t&quot;,..: 1 1 1 1 1 1 1 1 1 1 ...
+##  $ REFNUM    : num  1 2 3 4 5 6 7 8 9 10 ...
+</code></pre>
+
+<pre><code class="r">head(StormData)
+</code></pre>
+
+<pre><code>##   STATE__           BGN_DATE BGN_TIME TIME_ZONE COUNTY COUNTYNAME STATE
+## 1       1  4/18/1950 0:00:00     0130       CST     97     MOBILE    AL
+## 2       1  4/18/1950 0:00:00     0145       CST      3    BALDWIN    AL
+## 3       1  2/20/1951 0:00:00     1600       CST     57    FAYETTE    AL
+## 4       1   6/8/1951 0:00:00     0900       CST     89    MADISON    AL
+## 5       1 11/15/1951 0:00:00     1500       CST     43    CULLMAN    AL
+## 6       1 11/15/1951 0:00:00     2000       CST     77 LAUDERDALE    AL
+##    EVTYPE BGN_RANGE BGN_AZI BGN_LOCATI END_DATE END_TIME COUNTY_END
+## 1 TORNADO         0                                               0
+## 2 TORNADO         0                                               0
+## 3 TORNADO         0                                               0
+## 4 TORNADO         0                                               0
+## 5 TORNADO         0                                               0
+## 6 TORNADO         0                                               0
+##   COUNTYENDN END_RANGE END_AZI END_LOCATI LENGTH WIDTH F MAG FATALITIES
+## 1         NA         0                      14.0   100 3   0          0
+## 2         NA         0                       2.0   150 2   0          0
+## 3         NA         0                       0.1   123 2   0          0
+## 4         NA         0                       0.0   100 2   0          0
+## 5         NA         0                       0.0   150 2   0          0
+## 6         NA         0                       1.5   177 2   0          0
+##   INJURIES PROPDMG PROPDMGEXP CROPDMG CROPDMGEXP WFO STATEOFFIC ZONENAMES
+## 1       15    25.0          K       0                                    
+## 2        0     2.5          K       0                                    
+## 3        2    25.0          K       0                                    
+## 4        2     2.5          K       0                                    
+## 5        2     2.5          K       0                                    
+## 6        6     2.5          K       0                                    
+##   LATITUDE LONGITUDE LATITUDE_E LONGITUDE_ REMARKS REFNUM
+## 1     3040      8812       3051       8806              1
+## 2     3042      8755          0          0              2
+## 3     3340      8742          0          0              3
+## 4     3458      8626          0          0              4
+## 5     3412      8642          0          0              5
+## 6     3450      8748          0          0              6
+</code></pre>
+
+<p>The documentation refers to &ldquo;Summary&rdquo; EVTYPEs.  These are not &ldquo;storms&rdquo; as such and will be removed from the data.set.  Also only the pertinent columns, EVTYPE, CROPDMG, CROPDMGEXP, PROPDMG, PROPDMGEXP, FATALITIES and INJURIES will included.</p>
+
+<pre><code class="r">workData &lt;- subset(StormData, !grepl(&quot;Summary&quot;, StormData$EVTYPE), select=c(&#39;EVTYPE&#39;, &#39;CROPDMG&#39;, &#39;CROPDMGEXP&#39;, &#39;PROPDMG&#39;, &#39;PROPDMGEXP&#39;, &#39;FATALITIES&#39;, &#39;INJURIES&#39;))
+</code></pre>
+
+<p>Doing a summary of the CROPDMGEXP and of PROPMGEXP variables we get:</p>
+
+<pre><code class="r">summary(workData$CROPDMGEXP)
+</code></pre>
+
+<pre><code>##             0      2      ?      B      K      M      k      m 
+## 618340     19      1      7      9 281832   1994     21      1
+</code></pre>
+
+<pre><code class="r">summary(workData$PROPDMGEXP)
+</code></pre>
+
+<pre><code>##             +      -      0      1      2      3      4      5      6 
+## 465861      5      1    216     25     13      4      4     28      4 
+##      7      8      ?      B      H      K      M      h      m 
+##      5      1      8     40      6 424665  11330      1      7
+</code></pre>
+
+<p>The documentation states that the exponent values of the crop and property damage (CROPDMGEXP and PROPDMGEXP) are alpha and are: &ldquo;K&rdquo; for thousands, &ldquo;M&rdquo; for millions, &ldquo;B&rdquo; for billions, other values such as numbers and symbols are not defined.</p>
+
+<p>It may be a reasonable assumption that the sequence 0 thru 8 would be powers of ten and &ldquo;H&rdquo; is hundreds but they not mentioned in the documentation. Other characters such as &ldquo;+&rdquo;, &ldquo;-&rdquo;, &ldquo;?&rdquo; and lower case m, k, h are also not mentioned in the documentation.  This analyis will NOT make assumptions and will ignore all of these undocumented exponent characters.</p>
+
+<p>New fields for the crop and property damage exponents, CEXP and PEXP, will be set to the proper power of ten based on the valid exponent value.  An invalid exponent value will result in a value NA.</p>
+
+<pre><code class="r">#first fill the EXP value with NAs
+workData$CEXP &lt;- NA
+workData$PEXP &lt;- NA
+
+#then set the exponents to the proper power of ten based on the letters K, M, B
+
+workData$CEXP &lt;- ifelse(grepl(&#39;K&#39;, workData$CROPDMGEXP), 10^3, workData$CEXP)
+workData$CEXP &lt;- ifelse(grepl(&#39;M&#39;, workData$CROPDMGEXP), 10^6, workData$CEXP)
+workData$CEXP &lt;- ifelse(grepl(&#39;B&#39;, workData$CROPDMGEXP), 10^9, workData$CEXP)
+
+workData$PEXP &lt;- ifelse(grepl(&#39;K&#39;, workData$PROPDMGEXP), 10^3, workData$PEXP)
+workData$PEXP &lt;- ifelse(grepl(&#39;M&#39;, workData$PROPDMGEXP), 10^6, workData$PEXP)
+workData$PEXP &lt;- ifelse(grepl(&#39;B&#39;, workData$PROPDMGEXP), 10^9, workData$PEXP)
+summary(workData)
+</code></pre>
+
+<pre><code>##                EVTYPE          CROPDMG        CROPDMGEXP    
+##  HAIL             :288661   Min.   :  0.0          :618340  
+##  TSTM WIND        :219940   1st Qu.:  0.0   K      :281832  
+##  THUNDERSTORM WIND: 82563   Median :  0.0   M      :  1994  
+##  TORNADO          : 60652   Mean   :  1.5   k      :    21  
+##  FLASH FLOOD      : 54277   3rd Qu.:  0.0   0      :    19  
+##  FLOOD            : 25326   Max.   :990.0   B      :     9  
+##  (Other)          :170805                   (Other):     9  
+##     PROPDMG       PROPDMGEXP       FATALITIES     INJURIES     
+##  Min.   :   0          :465861   Min.   :  0   Min.   :   0.0  
+##  1st Qu.:   0   K      :424665   1st Qu.:  0   1st Qu.:   0.0  
+##  Median :   0   M      : 11330   Median :  0   Median :   0.0  
+##  Mean   :  12   0      :   216   Mean   :  0   Mean   :   0.2  
+##  3rd Qu.:   0   B      :    40   3rd Qu.:  0   3rd Qu.:   0.0  
+##  Max.   :5000   5      :    28   Max.   :583   Max.   :1700.0  
+##                 (Other):    84                                 
+##       CEXP               PEXP         
+##  Min.   :1.00e+03   Min.   :1.00e+03  
+##  1st Qu.:1.00e+03   1st Qu.:1.00e+03  
+##  Median :1.00e+03   Median :1.00e+03  
+##  Mean   :3.97e+04   Mean   :1.19e+05  
+##  3rd Qu.:1.00e+03   3rd Qu.:1.00e+03  
+##  Max.   :1.00e+09   Max.   :1.00e+09  
+##  NA&#39;s   :618389     NA&#39;s   :466189
+</code></pre>
+
+<pre><code class="r">#calculate the property damages to crops and property
+workData$CROPDMG &lt;- workData$CROPDMG * workData$CEXP
+workData$PROPDMG &lt;- workData$PROPDMG * workData$PEXP
+
+totals &lt;- ddply(workData, ~ EVTYPE, summarize,
+                CropDmgImpact=sum(CROPDMG, na.rm=TRUE),
+                PropDmgImpact=sum(PROPDMG, na.rm=TRUE),
+                TotalDmgImpact=sum(CROPDMG, PROPDMG, na.rm=TRUE),
+                Fatalities=sum(FATALITIES, na.rm=TRUE),
+                Injuries=sum(INJURIES, na.rm=TRUE),
+                TotalHealth=sum(FATALITIES, INJURIES, na.rm=TRUE))
+
+
+summary(totals)
+</code></pre>
+
+<pre><code>##                    EVTYPE    CropDmgImpact      PropDmgImpact     
+##     HIGH SURF ADVISORY:  1   Min.   :0.00e+00   Min.   :0.00e+00  
+##   COASTAL FLOOD       :  1   1st Qu.:0.00e+00   1st Qu.:0.00e+00  
+##   FLASH FLOOD         :  1   Median :0.00e+00   Median :0.00e+00  
+##   LIGHTNING           :  1   Mean   :5.33e+07   Mean   :4.64e+08  
+##   TSTM WIND           :  1   3rd Qu.:0.00e+00   3rd Qu.:7.70e+04  
+##   TSTM WIND (G45)     :  1   Max.   :1.40e+10   Max.   :1.45e+11  
+##  (Other)              :915                                        
+##  TotalDmgImpact       Fatalities      Injuries      TotalHealth   
+##  Min.   :0.00e+00   Min.   :   0   Min.   :    0   Min.   :    0  
+##  1st Qu.:0.00e+00   1st Qu.:   0   1st Qu.:    0   1st Qu.:    0  
+##  Median :0.00e+00   Median :   0   Median :    0   Median :    0  
+##  Mean   :5.17e+08   Mean   :  16   Mean   :  153   Mean   :  169  
+##  3rd Qu.:1.05e+05   3rd Qu.:   0   3rd Qu.:    0   3rd Qu.:    0  
+##  Max.   :1.50e+11   Max.   :5633   Max.   :91346   Max.   :96979  
+## 
+</code></pre>
+
+<pre><code class="r">dam &lt;- melt(workData, id.vars=&quot;EVTYPE&quot;, 
+                measure.vars=c(&quot;PROPDMG&quot;, &quot;CROPDMG&quot;))
+hea &lt;- melt(workData, id.vars=&quot;EVTYPE&quot;,
+                measure.vars=c(&quot;FATALITIES&quot;, &quot;INJURIES&quot;))
+
+damage &lt;- ddply(dam, ~ EVTYPE, summarize, value=sum(value, na.rm=TRUE))
+health &lt;- ddply(hea, ~ EVTYPE, summarize, value=sum(value, na.rm=TRUE))
+
+summary(damage)
+</code></pre>
+
+<pre><code>##                    EVTYPE        value         
+##     HIGH SURF ADVISORY:  1   Min.   :0.00e+00  
+##   COASTAL FLOOD       :  1   1st Qu.:0.00e+00  
+##   FLASH FLOOD         :  1   Median :0.00e+00  
+##   LIGHTNING           :  1   Mean   :5.17e+08  
+##   TSTM WIND           :  1   3rd Qu.:1.05e+05  
+##   TSTM WIND (G45)     :  1   Max.   :1.50e+11  
+##  (Other)              :915
+</code></pre>
+
+<pre><code class="r">summary(health)
+</code></pre>
+
+<pre><code>##                    EVTYPE        value      
+##     HIGH SURF ADVISORY:  1   Min.   :    0  
+##   COASTAL FLOOD       :  1   1st Qu.:    0  
+##   FLASH FLOOD         :  1   Median :    0  
+##   LIGHTNING           :  1   Mean   :  169  
+##   TSTM WIND           :  1   3rd Qu.:    0  
+##   TSTM WIND (G45)     :  1   Max.   :96979  
+##  (Other)              :915
+</code></pre>
+
+<h3>Results</h3>
+
+<ul>
+<li>Damage Impact Reports</li>
+</ul>
+
+<pre><code class="r">print(&quot;Top ten crop damage event types&quot;)
+</code></pre>
+
+<pre><code>## [1] &quot;Top ten crop damage event types&quot;
+</code></pre>
+
+<pre><code class="r">print(totals[order(-totals$CropDmgImpact),c(1,2)][1:10, ], row.names=FALSE)
+</code></pre>
+
+<pre><code>##             EVTYPE CropDmgImpact
+##            DROUGHT     1.397e+10
+##              FLOOD     5.662e+09
+##        RIVER FLOOD     5.029e+09
+##          ICE STORM     5.022e+09
+##               HAIL     3.026e+09
+##          HURRICANE     2.742e+09
+##  HURRICANE/TYPHOON     2.608e+09
+##        FLASH FLOOD     1.421e+09
+##       EXTREME COLD     1.293e+09
+##       FROST/FREEZE     1.094e+09
+</code></pre>
+
+<pre><code class="r">print(&quot;Top ten property damage event types&quot;)
+</code></pre>
+
+<pre><code>## [1] &quot;Top ten property damage event types&quot;
+</code></pre>
+
+<pre><code class="r">print(totals[order(-totals$PropDmgImpact), c(1,3)][1:10, ], row.names=FALSE)
+</code></pre>
+
+<pre><code>##             EVTYPE PropDmgImpact
+##              FLOOD     1.447e+11
+##  HURRICANE/TYPHOON     6.931e+10
+##            TORNADO     5.693e+10
+##        STORM SURGE     4.332e+10
+##        FLASH FLOOD     1.614e+10
+##               HAIL     1.573e+10
+##          HURRICANE     1.187e+10
+##     TROPICAL STORM     7.704e+09
+##       WINTER STORM     6.688e+09
+##          HIGH WIND     5.270e+09
+</code></pre>
+
+<pre><code class="r">print(&quot;Top ten total damage (crop + property)&quot;)
+</code></pre>
+
+<pre><code>## [1] &quot;Top ten total damage (crop + property)&quot;
+</code></pre>
+
+<pre><code class="r">print(totals[order(-totals$TotalDmgImpact), c(1,4)][1:10, ], row.names=FALSE)
+</code></pre>
+
+<pre><code>##             EVTYPE TotalDmgImpact
+##              FLOOD      1.503e+11
+##  HURRICANE/TYPHOON      7.191e+10
+##            TORNADO      5.734e+10
+##        STORM SURGE      4.332e+10
+##               HAIL      1.875e+10
+##        FLASH FLOOD      1.756e+10
+##            DROUGHT      1.502e+10
+##          HURRICANE      1.461e+10
+##        RIVER FLOOD      1.015e+10
+##          ICE STORM      8.967e+09
+</code></pre>
+
+<ul>
+<li>Health Impact Reports</li>
+</ul>
+
+<pre><code class="r">print(&quot;Top ten fatalities event types&quot;)
+</code></pre>
+
+<pre><code>## [1] &quot;Top ten fatalities event types&quot;
+</code></pre>
+
+<pre><code class="r">print(totals[order(-totals$Fatalities),c(1,5)][1:10, ], row.names=FALSE)
+</code></pre>
+
+<pre><code>##          EVTYPE Fatalities
+##         TORNADO       5633
+##  EXCESSIVE HEAT       1903
+##     FLASH FLOOD        978
+##            HEAT        937
+##       LIGHTNING        816
+##       TSTM WIND        504
+##           FLOOD        470
+##     RIP CURRENT        368
+##       HIGH WIND        248
+##       AVALANCHE        224
+</code></pre>
+
+<pre><code class="r">print(&quot;Top ten injuries event types&quot;)
+</code></pre>
+
+<pre><code>## [1] &quot;Top ten injuries event types&quot;
+</code></pre>
+
+<pre><code class="r">print(totals[order(-totals$Injuries),c(1,6)][1:10, ], row.names=FALSE)
+</code></pre>
+
+<pre><code>##             EVTYPE Injuries
+##            TORNADO    91346
+##          TSTM WIND     6957
+##              FLOOD     6789
+##     EXCESSIVE HEAT     6525
+##          LIGHTNING     5230
+##               HEAT     2100
+##          ICE STORM     1975
+##        FLASH FLOOD     1777
+##  THUNDERSTORM WIND     1488
+##               HAIL     1361
+</code></pre>
+
+<pre><code class="r">print(&quot;Top ten total health impact event types&quot;)
+</code></pre>
+
+<pre><code>## [1] &quot;Top ten total health impact event types&quot;
+</code></pre>
+
+<pre><code class="r">print(totals[order(-totals$TotalHealth),c(1,7)][1:10, ], row.names=FALSE)
+</code></pre>
+
+<pre><code>##             EVTYPE TotalHealth
+##            TORNADO       96979
+##     EXCESSIVE HEAT        8428
+##          TSTM WIND        7461
+##              FLOOD        7259
+##          LIGHTNING        6046
+##               HEAT        3037
+##        FLASH FLOOD        2755
+##          ICE STORM        2064
+##  THUNDERSTORM WIND        1621
+##       WINTER STORM        1527
+</code></pre>
+
+<h3>Environment</h3>
+
+<pre><code class="r">sessionInfo()
+</code></pre>
+
+<pre><code>## R version 3.0.2 (2013-09-25)
+## Platform: x86_64-redhat-linux-gnu (64-bit)
+## 
+## locale:
+## [1] C
+## 
+## attached base packages:
+## [1] stats     graphics  grDevices utils     datasets  methods   base     
+## 
+## other attached packages:
+## [1] plyr_1.8.1   reshape2_1.4 knitr_1.6   
+## 
+## loaded via a namespace (and not attached):
+## [1] Rcpp_0.11.2    digest_0.6.4   evaluate_0.5.5 formatR_0.10  
+## [5] stringr_0.6.2  tools_3.0.2
+</code></pre>
+
+</body>
+
+</html>
+
