@@ -53,16 +53,32 @@ Download <- function (fileURL, destfile, method="auto", quiet=TRUE) {
 url <- "https://d396qusza40orc.cloudfront.net/repdata%2Fdata%2FStormData.csv.bz2"
 dest <- "StormData.bz2"
 Download(url, dest)
+```
 
+```
+## [1] "DL file: ./data/StormData.bz2 on Sun Aug 24 11:59:07 2014"
+```
+
+```r
 #download storm data documentation
 url <- "https://d396qusza40orc.cloudfront.net/repdata%2Fpeer2_doc%2Fpd01016005curr.pdf"
 dest <- "pd0101600tcurr.pdf"
 Download(url, dest)
+```
 
+```
+## [1] "DL file: ./data/pd0101600tcurr.pdf on Sun Aug 24 12:00:19 2014"
+```
+
+```r
 #download storm events FAQ
 url <- "https://d396qusza40orc.cloudfront.net/repdata%2Fpeer2_doc%2FNCDC%20Storm%20Events-FAQ%20Page.pdf"
 dest <- "StormEventsFAQ.pdf"
 Download(url, dest)
+```
+
+```
+## [1] "DL file: ./data/StormEventsFAQ.pdf on Sun Aug 24 12:00:21 2014"
 ```
 
 #### Read data into StormData data.frame
@@ -136,7 +152,7 @@ The NOAA documentation states that the exponent values of the crop and property 
 
 Characters such as the sequence 0 through 8, "H", "+", "-", "?" and lower case m, k, h are not mentioned in the documentation.  This analysis in general takes a conservative approach toward the data, does NOT make assumptions and will ignore the observations for all of these undocumented exponent characters.
 
-New fields for the crop and property damage exponents, CEXP and PEXP, will be set to the proper power of ten based on the valid exponent value.  An invalid exponent value will result in a value of NA which utlimately results in that observation being excluded from the results.
+New fields for the crop and property damage exponents, CEXP and PEXP, will be set to the proper power of ten based on the valid exponent value.  An invalid exponent value will result in a value of NA which ultimately results in that observation being excluded from the results.
 
 
 ```r
@@ -259,12 +275,10 @@ print(totals[order(-totals$TotalHealthImpact),c(1,7)][1:events, ], row.names=FAL
 ##    WILD/FOREST FIRE               557
 ```
 
+Graphs of the top 5 event types for fatalities, injuries and total health impact.
+
 
 ```r
-#plotData <- data.frame()
-#plotData[, 1] <- totals[order(-totals$Fatalities),c(1)][1:5]
-#plotData[, 2] <- totals[order(-totals$Fatalities),c(5)][1:5]
-#qplot(plotData[, 1], plotData[, 2], geom='bar', stat='identity')
 plot1 <- 
     qplot(totals[order(-totals$Fatalities),c(1)] [1:5],
       totals[order(-totals$Fatalities),c(5)] [1:5]/1000, 
@@ -295,22 +309,16 @@ plot3 <-
       stat='identity')
 plot3 <- plot3 + theme(axis.text.x = element_text(angle=90))
 
-
-#x <- totals[order(-totals$Fatalities),c(1)][1:5]
-
-#y <- x[1:5]
-#y
-#x
-#d <- totals[order(-totals$Fatalities),c(1)][1:5]
-#str(d)
-#d
-grid.arrange(plot1, plot2, plot3, ncol=3)
+grid.arrange(plot1, plot2, plot3, main="Plots of Health Impacts", ncol=3)
 ```
 
 ![plot of chunk healthGraph](figure/healthGraph.png) 
-We see from the above printed tables and graphs that the top threats for human fatalities are TORNADO, EXCESSIVE HEAT and FLASH FLOOD.  The top threats for human injuries are TORNADO, TSTM WIND and FLOOD.  The top combined (fatalities and injuries) health threats come from TORNADO, EXCESSIVE HEAT and TSTM WIND.
 
-We notice that there are event types which are similar; e.g., Hurricane and Hurricane/Typhoon; Excessive Heat and Heat; and Flood, River Flood and Flash Flood.  Although it may seem logical, we have no evidence that these event types are actually the same and made the decision to not combine them. 
+#### Top Health Threats
+
+We see from the above printed tables and graphs that the top three threats for human fatalities are TORNADO, EXCESSIVE HEAT and FLASH FLOOD.  The top three threats for human injuries are TORNADO, TSTM WIND and FLOOD.  The top three combined (fatalities and injuries) health threats come from TORNADO, EXCESSIVE HEAT and TSTM WIND.
+
+We notice that there are event types which are similar; e.g., Hurricane and Hurricane/Typhoon; Excessive Heat and Heat; and Flood, River Flood and Flash Flood.  We have no evidence that these event types are actually the same and perhaps erring on conservative side made the decision to not combine them for neither the health impacts nor the damage impacts.
 
 #### Damage Impact Reports
 Top 20 events for crop damage, property damage and total damage (crop damage + property damage)
@@ -399,9 +407,48 @@ print(totals[order(-totals$TotalDmgImpact),c(1,4)][1:events, ], row.names=FALSE)
 ##  HEAVY RAIN/SEVERE WEATHER      2.500e+09
 ```
 
+Graphs of the top 5 event types for crop damage, property damage and total damage impact.
 
 
-We see from the above printed tables and graphs that the top threats for crop damage are DROUGHT, FLOOD and RIVER FLOOD.  The top threats for property damage are FLOOD, HURRICANE/TYPHOON and TORNADO.  The top combined (crop and property damage) threats come from FLOOD, HURRICANE/TYPHOON and TORNADO.
+```r
+plot1 <- 
+    qplot(totals[order(-totals$CropDmgImpact),c(1)] [1:5],
+      totals[order(-totals$CropDmgImpact),c(2)] [1:5]/1000000000, 
+      main='Crop Damage',
+      geom='bar', 
+      xlab="Event Type",
+      ylab="Billions of Dollars",
+      stat='identity')
+plot1 <- plot1 + theme(axis.text.x = element_text(angle=90))
+
+plot2 <- 
+    qplot(totals[order(-totals$PropDmgImpact),c(1)] [1:5],
+      totals[order(-totals$PropDmgImpact),c(3)] [1:5]/1000000000, 
+      main='Property Damage',
+      geom='bar', 
+      xlab="Event Type",
+      ylab="Billions of Dollars",
+      stat='identity')
+plot2 <- plot2 + theme(axis.text.x = element_text(angle=90))
+
+plot3 <- 
+    qplot(totals[order(-totals$TotalDmgImpact),c(1)] [1:5],
+      totals[order(-totals$TotalDmgImpact),c(4)] [1:5]/1000000000, 
+      main="Total Economic Impact",
+      geom='bar', 
+      xlab="Event Type",
+      ylab='Billions of Dollars',
+      stat='identity')
+plot3 <- plot3 + theme(axis.text.x = element_text(angle=90))
+
+grid.arrange(plot1, plot2, plot3, main="Plots of Economic Impacts", ncol=3)
+```
+
+![plot of chunk damageGraph](figure/damageGraph.png) 
+
+#### Top Economic Threats
+
+We see from the above printed tables and graphs that the top three threats for crop damage are DROUGHT, FLOOD and RIVER FLOOD.  The top threats for property damage are FLOOD, HURRICANE/TYPHOON and TORNADO.  The top combined (crop and property damage) threats come from FLOOD, HURRICANE/TYPHOON and TORNADO.
 
 ### Computing Environment
 
