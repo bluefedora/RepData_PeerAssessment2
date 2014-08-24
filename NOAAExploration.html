@@ -5,7 +5,7 @@
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
 <meta http-equiv="x-ua-compatible" content="IE=9" >
 
-<title>NOAA Storm Database Exploration</title>
+<title>Effects of Severe Weather on Property and Population in the US for the Time Period 1950 to November 2011</title>
 
 <style type="text/css">
 body, td {
@@ -179,17 +179,26 @@ hljs.initHighlightingOnLoad();
 </head>
 
 <body>
-<h2>NOAA Storm Database Exploration</h2>
+<h2>Effects of Severe Weather on Property and Population in the US for the Time Period 1950 to November 2011</h2>
 
 <h3>Synopsis</h3>
 
+<p>Storms and other severe weather events can cause both public health and economic problems for communities and municipalities. Many severe events can result in fatalities, injuries, and property damage, and preventing such outcomes to the extent possible is a key concern.</p>
+
+<p>This analysis involved exploring the U.S. National Oceanic and Atmospheric Administration&#39;s (NOAA) storm database. This database tracks characteristics of major storms and weather events in the United States, including when and where they occur, as well as estimates of any fatalities, injuries, and property damage.</p>
+
+<p>The data was downloaded and read into a data.frame.  The data.frame was subsetted into a DF that contained the pertinent data.  Some minor cleanup was performed and the data then summarized and the top 10 event types for damage and casualties are listed and graphed for your convenience.</p>
+
+<h3>Data Processing</h3>
+
+<h4>Setup the needed libraries and environment.</h4>
+
 <pre><code class="r">library(utils)
-library(reshape2)
 library(plyr)
 opts_chunk$set(echo=TRUE, fig.width=6, fig.height=6)
 </code></pre>
 
-<h3>Data Processing</h3>
+<p>Download the database along with the documentation files</p>
 
 <h4>Download data and documentation files</h4>
 
@@ -229,6 +238,12 @@ blueFedoraDownload(url, dest)
 
 <p>Exploring the storm data:</p>
 
+<pre><code class="r">dim(StormData)
+</code></pre>
+
+<pre><code>## [1] 902297     37
+</code></pre>
+
 <pre><code class="r">names(StormData)
 </code></pre>
 
@@ -242,87 +257,8 @@ blueFedoraDownload(url, dest)
 ## [36] &quot;REMARKS&quot;    &quot;REFNUM&quot;
 </code></pre>
 
-<pre><code class="r">str(StormData)
-</code></pre>
-
-<pre><code>## &#39;data.frame&#39;:    902297 obs. of  37 variables:
-##  $ STATE__   : num  1 1 1 1 1 1 1 1 1 1 ...
-##  $ BGN_DATE  : Factor w/ 16335 levels &quot;1/1/1966 0:00:00&quot;,..: 6523 6523 4242 11116 2224 2224 2260 383 3980 3980 ...
-##  $ BGN_TIME  : Factor w/ 3608 levels &quot;000&quot;,&quot;0000&quot;,&quot;0001&quot;,..: 152 167 2645 1563 2524 3126 122 1563 3126 3126 ...
-##  $ TIME_ZONE : Factor w/ 22 levels &quot;ADT&quot;,&quot;AKS&quot;,&quot;AST&quot;,..: 6 6 6 6 6 6 6 6 6 6 ...
-##  $ COUNTY    : num  97 3 57 89 43 77 9 123 125 57 ...
-##  $ COUNTYNAME: Factor w/ 29601 levels &quot;&quot;,&quot;5NM E OF MACKINAC BRIDGE TO PRESQUE ISLE LT MI&quot;,..: 13513 1873 4598 10592 4372 10094 1973 23873 24418 4598 ...
-##  $ STATE     : Factor w/ 72 levels &quot;AK&quot;,&quot;AL&quot;,&quot;AM&quot;,..: 2 2 2 2 2 2 2 2 2 2 ...
-##  $ EVTYPE    : Factor w/ 985 levels &quot;   HIGH SURF ADVISORY&quot;,..: 826 826 826 826 826 826 826 826 826 826 ...
-##  $ BGN_RANGE : num  0 0 0 0 0 0 0 0 0 0 ...
-##  $ BGN_AZI   : Factor w/ 35 levels &quot;&quot;,&quot;  N&quot;,&quot; NW&quot;,..: 1 1 1 1 1 1 1 1 1 1 ...
-##  $ BGN_LOCATI: Factor w/ 54429 levels &quot;&quot;,&quot; Christiansburg&quot;,..: 1 1 1 1 1 1 1 1 1 1 ...
-##  $ END_DATE  : Factor w/ 6663 levels &quot;&quot;,&quot;1/1/1993 0:00:00&quot;,..: 1 1 1 1 1 1 1 1 1 1 ...
-##  $ END_TIME  : Factor w/ 3647 levels &quot;&quot;,&quot; 0900CST&quot;,..: 1 1 1 1 1 1 1 1 1 1 ...
-##  $ COUNTY_END: num  0 0 0 0 0 0 0 0 0 0 ...
-##  $ COUNTYENDN: logi  NA NA NA NA NA NA ...
-##  $ END_RANGE : num  0 0 0 0 0 0 0 0 0 0 ...
-##  $ END_AZI   : Factor w/ 24 levels &quot;&quot;,&quot;E&quot;,&quot;ENE&quot;,&quot;ESE&quot;,..: 1 1 1 1 1 1 1 1 1 1 ...
-##  $ END_LOCATI: Factor w/ 34506 levels &quot;&quot;,&quot; CANTON&quot;,&quot; TULIA&quot;,..: 1 1 1 1 1 1 1 1 1 1 ...
-##  $ LENGTH    : num  14 2 0.1 0 0 1.5 1.5 0 3.3 2.3 ...
-##  $ WIDTH     : num  100 150 123 100 150 177 33 33 100 100 ...
-##  $ F         : int  3 2 2 2 2 2 2 1 3 3 ...
-##  $ MAG       : num  0 0 0 0 0 0 0 0 0 0 ...
-##  $ FATALITIES: num  0 0 0 0 0 0 0 0 1 0 ...
-##  $ INJURIES  : num  15 0 2 2 2 6 1 0 14 0 ...
-##  $ PROPDMG   : num  25 2.5 25 2.5 2.5 2.5 2.5 2.5 25 25 ...
-##  $ PROPDMGEXP: Factor w/ 19 levels &quot;&quot;,&quot;+&quot;,&quot;-&quot;,&quot;0&quot;,..: 16 16 16 16 16 16 16 16 16 16 ...
-##  $ CROPDMG   : num  0 0 0 0 0 0 0 0 0 0 ...
-##  $ CROPDMGEXP: Factor w/ 9 levels &quot;&quot;,&quot;0&quot;,&quot;2&quot;,&quot;?&quot;,..: 1 1 1 1 1 1 1 1 1 1 ...
-##  $ WFO       : Factor w/ 542 levels &quot;&quot;,&quot; CI&quot;,&quot;$AC&quot;,..: 1 1 1 1 1 1 1 1 1 1 ...
-##  $ STATEOFFIC: Factor w/ 250 levels &quot;&quot;,&quot;ALABAMA, Central&quot;,..: 1 1 1 1 1 1 1 1 1 1 ...
-##  $ ZONENAMES : Factor w/ 25112 levels &quot;&quot;,&quot;                                                                                                                               &quot;| __truncated__,..: 1 1 1 1 1 1 1 1 1 1 ...
-##  $ LATITUDE  : num  3040 3042 3340 3458 3412 ...
-##  $ LONGITUDE : num  8812 8755 8742 8626 8642 ...
-##  $ LATITUDE_E: num  3051 0 0 0 0 ...
-##  $ LONGITUDE_: num  8806 0 0 0 0 ...
-##  $ REMARKS   : Factor w/ 436781 levels &quot;&quot;,&quot;\t&quot;,&quot;\t\t&quot;,..: 1 1 1 1 1 1 1 1 1 1 ...
-##  $ REFNUM    : num  1 2 3 4 5 6 7 8 9 10 ...
-</code></pre>
-
-<pre><code class="r">head(StormData)
-</code></pre>
-
-<pre><code>##   STATE__           BGN_DATE BGN_TIME TIME_ZONE COUNTY COUNTYNAME STATE
-## 1       1  4/18/1950 0:00:00     0130       CST     97     MOBILE    AL
-## 2       1  4/18/1950 0:00:00     0145       CST      3    BALDWIN    AL
-## 3       1  2/20/1951 0:00:00     1600       CST     57    FAYETTE    AL
-## 4       1   6/8/1951 0:00:00     0900       CST     89    MADISON    AL
-## 5       1 11/15/1951 0:00:00     1500       CST     43    CULLMAN    AL
-## 6       1 11/15/1951 0:00:00     2000       CST     77 LAUDERDALE    AL
-##    EVTYPE BGN_RANGE BGN_AZI BGN_LOCATI END_DATE END_TIME COUNTY_END
-## 1 TORNADO         0                                               0
-## 2 TORNADO         0                                               0
-## 3 TORNADO         0                                               0
-## 4 TORNADO         0                                               0
-## 5 TORNADO         0                                               0
-## 6 TORNADO         0                                               0
-##   COUNTYENDN END_RANGE END_AZI END_LOCATI LENGTH WIDTH F MAG FATALITIES
-## 1         NA         0                      14.0   100 3   0          0
-## 2         NA         0                       2.0   150 2   0          0
-## 3         NA         0                       0.1   123 2   0          0
-## 4         NA         0                       0.0   100 2   0          0
-## 5         NA         0                       0.0   150 2   0          0
-## 6         NA         0                       1.5   177 2   0          0
-##   INJURIES PROPDMG PROPDMGEXP CROPDMG CROPDMGEXP WFO STATEOFFIC ZONENAMES
-## 1       15    25.0          K       0                                    
-## 2        0     2.5          K       0                                    
-## 3        2    25.0          K       0                                    
-## 4        2     2.5          K       0                                    
-## 5        2     2.5          K       0                                    
-## 6        6     2.5          K       0                                    
-##   LATITUDE LONGITUDE LATITUDE_E LONGITUDE_ REMARKS REFNUM
-## 1     3040      8812       3051       8806              1
-## 2     3042      8755          0          0              2
-## 3     3340      8742          0          0              3
-## 4     3458      8626          0          0              4
-## 5     3412      8642          0          0              5
-## 6     3450      8748          0          0              6
+<pre><code class="r">#str(StormData)
+#head(StormData)
 </code></pre>
 
 <p>The documentation refers to &ldquo;Summary&rdquo; EVTYPEs.  These are not &ldquo;storms&rdquo; as such and will be removed from the data.set.  Also only the pertinent columns, EVTYPE, CROPDMG, CROPDMGEXP, PROPDMG, PROPDMGEXP, FATALITIES and INJURIES will included.</p>
@@ -350,9 +286,9 @@ blueFedoraDownload(url, dest)
 
 <p>The documentation states that the exponent values of the crop and property damage (CROPDMGEXP and PROPDMGEXP) are alpha and are: &ldquo;K&rdquo; for thousands, &ldquo;M&rdquo; for millions, &ldquo;B&rdquo; for billions, other values such as numbers and symbols are not defined.</p>
 
-<p>It may be a reasonable assumption that the sequence 0 thru 8 would be powers of ten and &ldquo;H&rdquo; is hundreds but they not mentioned in the documentation. Other characters such as &ldquo;+&rdquo;, &ldquo;-&rdquo;, &ldquo;?&rdquo; and lower case m, k, h are also not mentioned in the documentation.  This analyis will NOT make assumptions and will ignore all of these undocumented exponent characters.</p>
+<p>It may be a reasonable assumption that the sequence 0 thru 8 would be powers of ten and &ldquo;H&rdquo; is hundreds but they not mentioned in the documentation. Other characters such as &ldquo;+&rdquo;, &ldquo;-&rdquo;, &ldquo;?&rdquo; and lower case m, k, h are also not mentioned in the documentation.  This analyis in general will take a conservative approach toward the data, will NOT make assumptions and will ignore all of these undocumented exponent characters.</p>
 
-<p>New fields for the crop and property damage exponents, CEXP and PEXP, will be set to the proper power of ten based on the valid exponent value.  An invalid exponent value will result in a value NA.</p>
+<p>New fields for the crop and property damage exponents, CEXP and PEXP, will be set to the proper power of ten based on the valid exponent value.  An invalid exponent value will result in a value NA and that observation will be excluded.</p>
 
 <pre><code class="r">#first fill the EXP value with NAs
 workData$CEXP &lt;- NA
@@ -407,8 +343,6 @@ totals &lt;- ddply(workData, ~ EVTYPE, summarize,
                 Fatalities=sum(FATALITIES, na.rm=TRUE),
                 Injuries=sum(INJURIES, na.rm=TRUE),
                 TotalHealth=sum(FATALITIES, INJURIES, na.rm=TRUE))
-
-
 summary(totals)
 </code></pre>
 
@@ -430,38 +364,16 @@ summary(totals)
 ## 
 </code></pre>
 
-<pre><code class="r">dam &lt;- melt(workData, id.vars=&quot;EVTYPE&quot;, 
-                measure.vars=c(&quot;PROPDMG&quot;, &quot;CROPDMG&quot;))
-hea &lt;- melt(workData, id.vars=&quot;EVTYPE&quot;,
-                measure.vars=c(&quot;FATALITIES&quot;, &quot;INJURIES&quot;))
-
-damage &lt;- ddply(dam, ~ EVTYPE, summarize, value=sum(value, na.rm=TRUE))
-health &lt;- ddply(hea, ~ EVTYPE, summarize, value=sum(value, na.rm=TRUE))
-
-summary(damage)
-</code></pre>
-
-<pre><code>##                    EVTYPE        value         
-##     HIGH SURF ADVISORY:  1   Min.   :0.00e+00  
-##   COASTAL FLOOD       :  1   1st Qu.:0.00e+00  
-##   FLASH FLOOD         :  1   Median :0.00e+00  
-##   LIGHTNING           :  1   Mean   :5.17e+08  
-##   TSTM WIND           :  1   3rd Qu.:1.05e+05  
-##   TSTM WIND (G45)     :  1   Max.   :1.50e+11  
-##  (Other)              :915
-</code></pre>
-
-<pre><code class="r">summary(health)
-</code></pre>
-
-<pre><code>##                    EVTYPE        value      
-##     HIGH SURF ADVISORY:  1   Min.   :    0  
-##   COASTAL FLOOD       :  1   1st Qu.:    0  
-##   FLASH FLOOD         :  1   Median :    0  
-##   LIGHTNING           :  1   Mean   :  169  
-##   TSTM WIND           :  1   3rd Qu.:    0  
-##   TSTM WIND (G45)     :  1   Max.   :96979  
-##  (Other)              :915
+<pre><code class="r">#dam &lt;- melt(workData, id.vars=&quot;EVTYPE&quot;, 
+#                measure.vars=c(&quot;PROPDMG&quot;, &quot;CROPDMG&quot;))
+#hea &lt;- melt(workData, id.vars=&quot;EVTYPE&quot;,
+#                measure.vars=c(&quot;FATALITIES&quot;, &quot;INJURIES&quot;))
+#
+#damage &lt;- ddply(dam, ~ EVTYPE, summarize, value=sum(value, na.rm=TRUE))
+#health &lt;- ddply(hea, ~ EVTYPE, summarize, value=sum(value, na.rm=TRUE))
+#
+#summary(damage)
+#summary(health)
 </code></pre>
 
 <h3>Results</h3>
@@ -476,7 +388,7 @@ summary(damage)
 <pre><code>## [1] &quot;Top ten crop damage event types&quot;
 </code></pre>
 
-<pre><code class="r">print(totals[order(-totals$CropDmgImpact),c(1,2)][1:10, ], row.names=FALSE)
+<pre><code class="r">print(totals[order(-totals$CropDmgImpact),c(1,2)][1:15, ], row.names=FALSE)
 </code></pre>
 
 <pre><code>##             EVTYPE CropDmgImpact
@@ -490,6 +402,11 @@ summary(damage)
 ##        FLASH FLOOD     1.421e+09
 ##       EXTREME COLD     1.293e+09
 ##       FROST/FREEZE     1.094e+09
+##         HEAVY RAIN     7.334e+08
+##     TROPICAL STORM     6.783e+08
+##          HIGH WIND     6.386e+08
+##          TSTM WIND     5.540e+08
+##     EXCESSIVE HEAT     4.924e+08
 </code></pre>
 
 <pre><code class="r">print(&quot;Top ten property damage event types&quot;)
@@ -498,7 +415,7 @@ summary(damage)
 <pre><code>## [1] &quot;Top ten property damage event types&quot;
 </code></pre>
 
-<pre><code class="r">print(totals[order(-totals$PropDmgImpact), c(1,3)][1:10, ], row.names=FALSE)
+<pre><code class="r">print(totals[order(-totals$PropDmgImpact), c(1,3)][1:15, ], row.names=FALSE)
 </code></pre>
 
 <pre><code>##             EVTYPE PropDmgImpact
@@ -512,6 +429,11 @@ summary(damage)
 ##     TROPICAL STORM     7.704e+09
 ##       WINTER STORM     6.688e+09
 ##          HIGH WIND     5.270e+09
+##        RIVER FLOOD     5.119e+09
+##           WILDFIRE     4.765e+09
+##   STORM SURGE/TIDE     4.641e+09
+##          TSTM WIND     4.485e+09
+##          ICE STORM     3.945e+09
 </code></pre>
 
 <pre><code class="r">print(&quot;Top ten total damage (crop + property)&quot;)
@@ -520,7 +442,7 @@ summary(damage)
 <pre><code>## [1] &quot;Top ten total damage (crop + property)&quot;
 </code></pre>
 
-<pre><code class="r">print(totals[order(-totals$TotalDmgImpact), c(1,4)][1:10, ], row.names=FALSE)
+<pre><code class="r">print(totals[order(-totals$TotalDmgImpact), c(1,4)][1:15, ], row.names=FALSE)
 </code></pre>
 
 <pre><code>##             EVTYPE TotalDmgImpact
@@ -534,6 +456,11 @@ summary(damage)
 ##          HURRICANE      1.461e+10
 ##        RIVER FLOOD      1.015e+10
 ##          ICE STORM      8.967e+09
+##     TROPICAL STORM      8.382e+09
+##       WINTER STORM      6.715e+09
+##          HIGH WIND      5.909e+09
+##           WILDFIRE      5.061e+09
+##          TSTM WIND      5.039e+09
 </code></pre>
 
 <ul>
@@ -546,20 +473,25 @@ summary(damage)
 <pre><code>## [1] &quot;Top ten fatalities event types&quot;
 </code></pre>
 
-<pre><code class="r">print(totals[order(-totals$Fatalities),c(1,5)][1:10, ], row.names=FALSE)
+<pre><code class="r">print(totals[order(-totals$Fatalities),c(1,5)][1:15, ], row.names=FALSE)
 </code></pre>
 
-<pre><code>##          EVTYPE Fatalities
-##         TORNADO       5633
-##  EXCESSIVE HEAT       1903
-##     FLASH FLOOD        978
-##            HEAT        937
-##       LIGHTNING        816
-##       TSTM WIND        504
-##           FLOOD        470
-##     RIP CURRENT        368
-##       HIGH WIND        248
-##       AVALANCHE        224
+<pre><code>##             EVTYPE Fatalities
+##            TORNADO       5633
+##     EXCESSIVE HEAT       1903
+##        FLASH FLOOD        978
+##               HEAT        937
+##          LIGHTNING        816
+##          TSTM WIND        504
+##              FLOOD        470
+##        RIP CURRENT        368
+##          HIGH WIND        248
+##          AVALANCHE        224
+##       WINTER STORM        206
+##       RIP CURRENTS        204
+##          HEAT WAVE        172
+##       EXTREME COLD        160
+##  THUNDERSTORM WIND        133
 </code></pre>
 
 <pre><code class="r">print(&quot;Top ten injuries event types&quot;)
@@ -568,7 +500,7 @@ summary(damage)
 <pre><code>## [1] &quot;Top ten injuries event types&quot;
 </code></pre>
 
-<pre><code class="r">print(totals[order(-totals$Injuries),c(1,6)][1:10, ], row.names=FALSE)
+<pre><code class="r">print(totals[order(-totals$Injuries),c(1,6)][1:15, ], row.names=FALSE)
 </code></pre>
 
 <pre><code>##             EVTYPE Injuries
@@ -582,6 +514,11 @@ summary(damage)
 ##        FLASH FLOOD     1777
 ##  THUNDERSTORM WIND     1488
 ##               HAIL     1361
+##       WINTER STORM     1321
+##  HURRICANE/TYPHOON     1275
+##          HIGH WIND     1137
+##         HEAVY SNOW     1021
+##           WILDFIRE      911
 </code></pre>
 
 <pre><code class="r">print(&quot;Top ten total health impact event types&quot;)
@@ -590,7 +527,7 @@ summary(damage)
 <pre><code>## [1] &quot;Top ten total health impact event types&quot;
 </code></pre>
 
-<pre><code class="r">print(totals[order(-totals$TotalHealth),c(1,7)][1:10, ], row.names=FALSE)
+<pre><code class="r">print(totals[order(-totals$TotalHealth),c(1,7)][1:15, ], row.names=FALSE)
 </code></pre>
 
 <pre><code>##             EVTYPE TotalHealth
@@ -604,6 +541,11 @@ summary(damage)
 ##          ICE STORM        2064
 ##  THUNDERSTORM WIND        1621
 ##       WINTER STORM        1527
+##          HIGH WIND        1385
+##               HAIL        1376
+##  HURRICANE/TYPHOON        1339
+##         HEAVY SNOW        1148
+##           WILDFIRE         986
 </code></pre>
 
 <h3>Environment</h3>
@@ -621,7 +563,7 @@ summary(damage)
 ## [1] stats     graphics  grDevices utils     datasets  methods   base     
 ## 
 ## other attached packages:
-## [1] plyr_1.8.1   reshape2_1.4 knitr_1.6   
+## [1] plyr_1.8.1 knitr_1.6 
 ## 
 ## loaded via a namespace (and not attached):
 ## [1] Rcpp_0.11.2    digest_0.6.4   evaluate_0.5.5 formatR_0.10  
