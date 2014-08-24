@@ -19,7 +19,16 @@ The data were downloaded and subsetted to contain only the pertinent variables. 
 ```r
 library(utils)
 library(plyr)
-opts_chunk$set(echo=TRUE, fig.width=6, fig.height=6)
+library(ggplot2)
+library(gridExtra)
+```
+
+```
+## Loading required package: grid
+```
+
+```r
+opts_chunk$set(echo=TRUE, fig.width=11, fig.height=6)
 events <- 20 # number of event types for which to report results
 ```
 
@@ -251,7 +260,54 @@ print(totals[order(-totals$TotalHealthImpact),c(1,7)][1:events, ], row.names=FAL
 ```
 
 
+```r
+#plotData <- data.frame()
+#plotData[, 1] <- totals[order(-totals$Fatalities),c(1)][1:5]
+#plotData[, 2] <- totals[order(-totals$Fatalities),c(5)][1:5]
+#qplot(plotData[, 1], plotData[, 2], geom='bar', stat='identity')
+plot1 <- 
+    qplot(totals[order(-totals$Fatalities),c(1)] [1:5],
+      totals[order(-totals$Fatalities),c(5)] [1:5]/1000, 
+      main='Fatalities',
+      geom='bar', 
+      xlab="Event Type",
+      ylab="Thousands of Fatalities",
+      stat='identity')
+plot1 <- plot1 + theme(axis.text.x = element_text(angle=90))
 
+plot2 <- 
+    qplot(totals[order(-totals$Injuries),c(1)] [1:5],
+      totals[order(-totals$Injuries),c(6)] [1:5]/1000, 
+      main='Injuries',
+      geom='bar', 
+      xlab="Event Type",
+      ylab="Thousands of Injuries",
+      stat='identity')
+plot2 <- plot2 + theme(axis.text.x = element_text(angle=90))
+
+plot3 <- 
+    qplot(totals[order(-totals$TotalHealthImpact),c(1)] [1:5],
+      totals[order(-totals$TotalHealthImpact),c(7)] [1:5]/1000, 
+      main="Total Health Impact",
+      geom='bar', 
+      xlab="Event Type",
+      ylab='Thousands of (Injuries + Fatalities)',
+      stat='identity')
+plot3 <- plot3 + theme(axis.text.x = element_text(angle=90))
+
+
+#x <- totals[order(-totals$Fatalities),c(1)][1:5]
+
+#y <- x[1:5]
+#y
+#x
+#d <- totals[order(-totals$Fatalities),c(1)][1:5]
+#str(d)
+#d
+grid.arrange(plot1, plot2, plot3, ncol=3)
+```
+
+![plot of chunk healthGraph](figure/healthGraph.png) 
 We see from the above printed tables and graphs that the top threats for human fatalities are TORNADO, EXCESSIVE HEAT and FLASH FLOOD.  The top threats for human injuries are TORNADO, TSTM WIND and FLOOD.  The top combined (fatalities and injuries) health threats come from TORNADO, EXCESSIVE HEAT and TSTM WIND.
 
 We notice that there are event types which are similar; e.g., Hurricane and Hurricane/Typhoon; Excessive Heat and Heat; and Flood, River Flood and Flash Flood.  Although it may seem logical, we have no evidence that these event types are actually the same and made the decision to not combine them. 
@@ -361,12 +417,15 @@ sessionInfo()
 ## [1] C
 ## 
 ## attached base packages:
-## [1] stats     graphics  grDevices utils     datasets  methods   base     
+## [1] grid      stats     graphics  grDevices utils     datasets  methods  
+## [8] base     
 ## 
 ## other attached packages:
-## [1] plyr_1.8.1 knitr_1.6 
+## [1] gridExtra_0.9.1 ggplot2_1.0.0   plyr_1.8.1      knitr_1.6      
 ## 
 ## loaded via a namespace (and not attached):
-## [1] Rcpp_0.11.2    digest_0.6.4   evaluate_0.5.5 formatR_0.10  
-## [5] stringr_0.6.2  tools_3.0.2
+##  [1] MASS_7.3-33      Rcpp_0.11.2      codetools_0.2-8  colorspace_1.2-4
+##  [5] digest_0.6.4     evaluate_0.5.5   formatR_0.10     gtable_0.1.2    
+##  [9] labeling_0.2     munsell_0.4.2    proto_0.3-10     reshape2_1.4    
+## [13] scales_0.2.4     stringr_0.6.2    tools_3.0.2
 ```
