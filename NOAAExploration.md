@@ -4,7 +4,7 @@
 
 Storms and other severe weather events can cause both public health and economic problems for communities and municipalities. Many severe events can result in fatalities, injuries, and property damage, and preventing such outcomes to the extent possible is a key concern.
 
-This analysis involved exploring the U.S. National Oceanic and Atmospheric Administration's (NOAA) storm database. This database tracks characteristics of major storms and weather events in the United States, including when and where they occur, as well as estimates of any fatalities, injuries, and property damage.
+This analysis involves exploring the U.S. National Oceanic and Atmospheric Administration's (NOAA) storm database. This database tracks characteristics of major storms and weather events in the United States, including when and where they occur, as well as estimates of any fatalities, injuries, and property damage.
 
 The data was downloaded and read into a data.frame.  The data.frame was subsetted into a DF that contained the pertinent data.  Some minor cleanup was performed and the data then summarized and the top 10 event types for damage and casualties are listed and graphed for your convenience.
 
@@ -88,14 +88,14 @@ names(StormData)
 #head(StormData)
 ```
 
-The documentation refers to "Summary" EVTYPEs.  These are not "storms" as such and will be removed from the data.set.  Also only the pertinent columns, EVTYPE, CROPDMG, CROPDMGEXP, PROPDMG, PROPDMGEXP, FATALITIES and INJURIES will included.
+The documentation refers to "Summary" EVTYPEs.  These are not "storms" as such and will be removed from the data.set.  Also only the pertinent columns, EVTYPE, CROPDMG, CROPDMGEXP, PROPDMG, PROPDMGEXP, FATALITIES and INJURIES will be included.
 
 
 ```r
 workData <- subset(StormData, !grepl("Summary", StormData$EVTYPE), select=c('EVTYPE', 'CROPDMG', 'CROPDMGEXP', 'PROPDMG', 'PROPDMGEXP', 'FATALITIES', 'INJURIES'))
 ```
 
-Doing a summary of the CROPDMGEXP and of PROPMGEXP variables we get:
+Doing a summary of the exponent data for crops and property damage, CROPDMGEXP and PROPMGEXP variables, we get:
 
 
 ```r
@@ -118,11 +118,11 @@ summary(workData$PROPDMGEXP)
 ##      5      1      8     40      6 424665  11330      1      7
 ```
 
-The documentation states that the exponent values of the crop and property damage (CROPDMGEXP and PROPDMGEXP) are alpha and are: "K" for thousands, "M" for millions, "B" for billions, other values such as numbers and symbols are not defined.
+The NOAA documentation states that the exponent values of the crop and property damage (CROPDMGEXP and PROPDMGEXP) are alpha and are: "K" for thousands, "M" for millions, "B" for billions, other values such as numbers and symbols are not defined.
 
-It may be a reasonable assumption that the sequence 0 thru 8 would be powers of ten and "H" is hundreds but they not mentioned in the documentation. Other characters such as "+", "-", "?" and lower case m, k, h are also not mentioned in the documentation.  This analyis in general will take a conservative approach toward the data, will NOT make assumptions and will ignore all of these undocumented exponent characters.
+It may be a reasonable assumption that the sequence 0 thru 8 would be powers of ten and "H" is hundreds but they not mentioned in the documentation. Other characters such as "+", "-", "?" and lower case m, k, h are also not mentioned in the documentation.  This analyis in general takes a conservative approach toward the data, does NOT make assumptions and will ignore all of these undocumented exponent characters.
 
-New fields for the crop and property damage exponents, CEXP and PEXP, will be set to the proper power of ten based on the valid exponent value.  An invalid exponent value will result in a value NA and that observation will be excluded.
+New fields for the crop and property damage exponents, CEXP and PEXP, will be set to the proper power of ten based on the valid exponent value.  An invalid exponent value will result in a value NA that results in that observation being excluded from the results.
 
 
 ```r
@@ -218,111 +218,15 @@ summary(totals)
 
 ### Results
 
-* Damage Impact Reports
-
-
-```r
-print("Top ten crop damage event types")
-```
-
-```
-## [1] "Top ten crop damage event types"
-```
-
-```r
-print(totals[order(-totals$CropDmgImpact),c(1,2)][1:15, ], row.names=FALSE)
-```
-
-```
-##             EVTYPE CropDmgImpact
-##            DROUGHT     1.397e+10
-##              FLOOD     5.662e+09
-##        RIVER FLOOD     5.029e+09
-##          ICE STORM     5.022e+09
-##               HAIL     3.026e+09
-##          HURRICANE     2.742e+09
-##  HURRICANE/TYPHOON     2.608e+09
-##        FLASH FLOOD     1.421e+09
-##       EXTREME COLD     1.293e+09
-##       FROST/FREEZE     1.094e+09
-##         HEAVY RAIN     7.334e+08
-##     TROPICAL STORM     6.783e+08
-##          HIGH WIND     6.386e+08
-##          TSTM WIND     5.540e+08
-##     EXCESSIVE HEAT     4.924e+08
-```
-
-```r
-print("Top ten property damage event types")
-```
-
-```
-## [1] "Top ten property damage event types"
-```
-
-```r
-print(totals[order(-totals$PropDmgImpact), c(1,3)][1:15, ], row.names=FALSE)
-```
-
-```
-##             EVTYPE PropDmgImpact
-##              FLOOD     1.447e+11
-##  HURRICANE/TYPHOON     6.931e+10
-##            TORNADO     5.693e+10
-##        STORM SURGE     4.332e+10
-##        FLASH FLOOD     1.614e+10
-##               HAIL     1.573e+10
-##          HURRICANE     1.187e+10
-##     TROPICAL STORM     7.704e+09
-##       WINTER STORM     6.688e+09
-##          HIGH WIND     5.270e+09
-##        RIVER FLOOD     5.119e+09
-##           WILDFIRE     4.765e+09
-##   STORM SURGE/TIDE     4.641e+09
-##          TSTM WIND     4.485e+09
-##          ICE STORM     3.945e+09
-```
-
-```r
-print("Top ten total damage (crop + property)")
-```
-
-```
-## [1] "Top ten total damage (crop + property)"
-```
-
-```r
-print(totals[order(-totals$TotalDmgImpact), c(1,4)][1:15, ], row.names=FALSE)
-```
-
-```
-##             EVTYPE TotalDmgImpact
-##              FLOOD      1.503e+11
-##  HURRICANE/TYPHOON      7.191e+10
-##            TORNADO      5.734e+10
-##        STORM SURGE      4.332e+10
-##               HAIL      1.875e+10
-##        FLASH FLOOD      1.756e+10
-##            DROUGHT      1.502e+10
-##          HURRICANE      1.461e+10
-##        RIVER FLOOD      1.015e+10
-##          ICE STORM      8.967e+09
-##     TROPICAL STORM      8.382e+09
-##       WINTER STORM      6.715e+09
-##          HIGH WIND      5.909e+09
-##           WILDFIRE      5.061e+09
-##          TSTM WIND      5.039e+09
-```
-
 * Health Impact Reports
 
 
 ```r
-print("Top ten fatalities event types")
+print("Top fifteen fatalities event types")
 ```
 
 ```
-## [1] "Top ten fatalities event types"
+## [1] "Top fifteen fatalities event types"
 ```
 
 ```r
@@ -349,11 +253,11 @@ print(totals[order(-totals$Fatalities),c(1,5)][1:15, ], row.names=FALSE)
 ```
 
 ```r
-print("Top ten injuries event types")
+print("Top fifteen injuries event types")
 ```
 
 ```
-## [1] "Top ten injuries event types"
+## [1] "Top fifteen injuries event types"
 ```
 
 ```r
@@ -380,11 +284,11 @@ print(totals[order(-totals$Injuries),c(1,6)][1:15, ], row.names=FALSE)
 ```
 
 ```r
-print("Top ten total health impact event types")
+print("Top fifteen total health impact event types")
 ```
 
 ```
-## [1] "Top ten total health impact event types"
+## [1] "Top fifteen total health impact event types"
 ```
 
 ```r
@@ -408,6 +312,106 @@ print(totals[order(-totals$TotalHealth),c(1,7)][1:15, ], row.names=FALSE)
 ##  HURRICANE/TYPHOON        1339
 ##         HEAVY SNOW        1148
 ##           WILDFIRE         986
+```
+
+We see from the above printed table that the top threats for human fatalities are , and .  The top threats for human injuries are , and .  The top combined health threats come from , and .
+
+We notice that there are event types which are similar; e.g., Hurricane and Hurrican/Typhoon and Flood, River Flood and Flash Flood.  We have no evidence that these event types are actually the same and made the decision to not combine them.
+
+* Damage Impact Reports
+
+
+```r
+print("Top fifteen crop damage event types")
+```
+
+```
+## [1] "Top fifteen crop damage event types"
+```
+
+```r
+print(totals[order(-totals$CropDmgImpact),c(1,2)][1:15, ], row.names=FALSE)
+```
+
+```
+##             EVTYPE CropDmgImpact
+##            DROUGHT     1.397e+10
+##              FLOOD     5.662e+09
+##        RIVER FLOOD     5.029e+09
+##          ICE STORM     5.022e+09
+##               HAIL     3.026e+09
+##          HURRICANE     2.742e+09
+##  HURRICANE/TYPHOON     2.608e+09
+##        FLASH FLOOD     1.421e+09
+##       EXTREME COLD     1.293e+09
+##       FROST/FREEZE     1.094e+09
+##         HEAVY RAIN     7.334e+08
+##     TROPICAL STORM     6.783e+08
+##          HIGH WIND     6.386e+08
+##          TSTM WIND     5.540e+08
+##     EXCESSIVE HEAT     4.924e+08
+```
+
+```r
+print("Top fifteen property damage event types")
+```
+
+```
+## [1] "Top fifteen property damage event types"
+```
+
+```r
+print(totals[order(-totals$PropDmgImpact), c(1,3)][1:15, ], row.names=FALSE)
+```
+
+```
+##             EVTYPE PropDmgImpact
+##              FLOOD     1.447e+11
+##  HURRICANE/TYPHOON     6.931e+10
+##            TORNADO     5.693e+10
+##        STORM SURGE     4.332e+10
+##        FLASH FLOOD     1.614e+10
+##               HAIL     1.573e+10
+##          HURRICANE     1.187e+10
+##     TROPICAL STORM     7.704e+09
+##       WINTER STORM     6.688e+09
+##          HIGH WIND     5.270e+09
+##        RIVER FLOOD     5.119e+09
+##           WILDFIRE     4.765e+09
+##   STORM SURGE/TIDE     4.641e+09
+##          TSTM WIND     4.485e+09
+##          ICE STORM     3.945e+09
+```
+
+```r
+print("Top fifteen total damage (crop + property)")
+```
+
+```
+## [1] "Top fifteen total damage (crop + property)"
+```
+
+```r
+print(totals[order(-totals$TotalDmgImpact), c(1,4)][1:15, ], row.names=FALSE)
+```
+
+```
+##             EVTYPE TotalDmgImpact
+##              FLOOD      1.503e+11
+##  HURRICANE/TYPHOON      7.191e+10
+##            TORNADO      5.734e+10
+##        STORM SURGE      4.332e+10
+##               HAIL      1.875e+10
+##        FLASH FLOOD      1.756e+10
+##            DROUGHT      1.502e+10
+##          HURRICANE      1.461e+10
+##        RIVER FLOOD      1.015e+10
+##          ICE STORM      8.967e+09
+##     TROPICAL STORM      8.382e+09
+##       WINTER STORM      6.715e+09
+##          HIGH WIND      5.909e+09
+##           WILDFIRE      5.061e+09
+##          TSTM WIND      5.039e+09
 ```
 
 

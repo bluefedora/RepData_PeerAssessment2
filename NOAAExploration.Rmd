@@ -4,7 +4,7 @@
 
 Storms and other severe weather events can cause both public health and economic problems for communities and municipalities. Many severe events can result in fatalities, injuries, and property damage, and preventing such outcomes to the extent possible is a key concern.
 
-This analysis involved exploring the U.S. National Oceanic and Atmospheric Administration's (NOAA) storm database. This database tracks characteristics of major storms and weather events in the United States, including when and where they occur, as well as estimates of any fatalities, injuries, and property damage.
+This analysis involves exploring the U.S. National Oceanic and Atmospheric Administration's (NOAA) storm database. This database tracks characteristics of major storms and weather events in the United States, including when and where they occur, as well as estimates of any fatalities, injuries, and property damage.
 
 The data was downloaded and read into a data.frame.  The data.frame was subsetted into a DF that contained the pertinent data.  Some minor cleanup was performed and the data then summarized and the top 10 event types for damage and casualties are listed and graphed for your convenience.
 
@@ -63,24 +63,24 @@ names(StormData)
 #head(StormData)
 ```
 
-The documentation refers to "Summary" EVTYPEs.  These are not "storms" as such and will be removed from the data.set.  Also only the pertinent columns, EVTYPE, CROPDMG, CROPDMGEXP, PROPDMG, PROPDMGEXP, FATALITIES and INJURIES will included.
+The documentation refers to "Summary" EVTYPEs.  These are not "storms" as such and will be removed from the data.set.  Also only the pertinent columns, EVTYPE, CROPDMG, CROPDMGEXP, PROPDMG, PROPDMGEXP, FATALITIES and INJURIES will be included.
 
 ```{r removeSummaries}
 workData <- subset(StormData, !grepl("Summary", StormData$EVTYPE), select=c('EVTYPE', 'CROPDMG', 'CROPDMGEXP', 'PROPDMG', 'PROPDMGEXP', 'FATALITIES', 'INJURIES'))
 ```
 
-Doing a summary of the CROPDMGEXP and of PROPMGEXP variables we get:
+Doing a summary of the exponent data for crops and property damage, CROPDMGEXP and PROPMGEXP variables, we get:
 
 ```{r summaryData}
 summary(workData$CROPDMGEXP)
 summary(workData$PROPDMGEXP)
 ```
 
-The documentation states that the exponent values of the crop and property damage (CROPDMGEXP and PROPDMGEXP) are alpha and are: "K" for thousands, "M" for millions, "B" for billions, other values such as numbers and symbols are not defined.
+The NOAA documentation states that the exponent values of the crop and property damage (CROPDMGEXP and PROPDMGEXP) are alpha and are: "K" for thousands, "M" for millions, "B" for billions, other values such as numbers and symbols are not defined.
 
-It may be a reasonable assumption that the sequence 0 thru 8 would be powers of ten and "H" is hundreds but they not mentioned in the documentation. Other characters such as "+", "-", "?" and lower case m, k, h are also not mentioned in the documentation.  This analyis in general will take a conservative approach toward the data, will NOT make assumptions and will ignore all of these undocumented exponent characters.
+It may be a reasonable assumption that the sequence 0 thru 8 would be powers of ten and "H" is hundreds but they not mentioned in the documentation. Other characters such as "+", "-", "?" and lower case m, k, h are also not mentioned in the documentation.  This analyis in general takes a conservative approach toward the data, does NOT make assumptions and will ignore all of these undocumented exponent characters.
 
-New fields for the crop and property damage exponents, CEXP and PEXP, will be set to the proper power of ten based on the valid exponent value.  An invalid exponent value will result in a value NA and that observation will be excluded.
+New fields for the crop and property damage exponents, CEXP and PEXP, will be set to the proper power of ten based on the valid exponent value.  An invalid exponent value will result in a value NA that results in that observation being excluded from the results.
 
 ```{r prepareMeltAggregate}
 #first fill the EXP value with NAs
@@ -125,30 +125,34 @@ summary(totals)
 
 ### Results
 
-* Damage Impact Reports
-
-```{r damageReports}
-print("Top ten crop damage event types")
-print(totals[order(-totals$CropDmgImpact),c(1,2)][1:15, ], row.names=FALSE)
-
-print("Top ten property damage event types")
-print(totals[order(-totals$PropDmgImpact), c(1,3)][1:15, ], row.names=FALSE)
-
-print("Top ten total damage (crop + property)")
-print(totals[order(-totals$TotalDmgImpact), c(1,4)][1:15, ], row.names=FALSE)
-```
-
 * Health Impact Reports
 
 ```{r healthReports}
-print("Top ten fatalities event types")
+print("Top fifteen fatalities event types")
 print(totals[order(-totals$Fatalities),c(1,5)][1:15, ], row.names=FALSE)
 
-print("Top ten injuries event types")
+print("Top fifteen injuries event types")
 print(totals[order(-totals$Injuries),c(1,6)][1:15, ], row.names=FALSE)
 
-print("Top ten total health impact event types")
+print("Top fifteen total health impact event types")
 print(totals[order(-totals$TotalHealth),c(1,7)][1:15, ], row.names=FALSE)
+```
+
+We see from the above printed table that the top threats for human fatalities are , and .  The top threats for human injuries are , and .  The top combined health threats come from , and .
+
+We notice that there are event types which are similar; e.g., Hurricane and Hurrican/Typhoon and Flood, River Flood and Flash Flood.  We have no evidence that these event types are actually the same and made the decision to not combine them.
+
+* Damage Impact Reports
+
+```{r damageReports}
+print("Top fifteen crop damage event types")
+print(totals[order(-totals$CropDmgImpact),c(1,2)][1:15, ], row.names=FALSE)
+
+print("Top fifteen property damage event types")
+print(totals[order(-totals$PropDmgImpact), c(1,3)][1:15, ], row.names=FALSE)
+
+print("Top fifteen total damage (crop + property)")
+print(totals[order(-totals$TotalDmgImpact), c(1,4)][1:15, ], row.names=FALSE)
 ```
 
 
